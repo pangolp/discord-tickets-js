@@ -5,54 +5,22 @@ const client = new discord.Client({
     intents: 3276799
 });
 
-const embed = {
-    title: 'Panel de soporte',
-    description: 'Abre un ticket de soporte haciendo click en una opción del menu de aqui abajo! 🎉',
-    color: 0x5865F2,
-    image: {
-        url: 'https://tecnosoluciones.com/wp-content/uploads/2023/02/soporte-remoto.png'
-    }
-};
+client.on('messageCreate', async (message) => {
 
-const menu = new discord.ActionRowBuilder().addComponents(
-    new discord.StringSelectMenuBuilder()
-    .setPlaceholder('Abre un ticket de soporte.')
-    .setMaxValues(1)
-    .setMinValues(1)
-    .setCustomId('ticket-create')
-    .setOptions(
-        [
-            {
-                label: 'Soporte',
-                emoji: '💡',
-                description: 'Abrir un ticket de soporte',
-                value: 'soporte'
-            },
-            {
-                label: 'Reportes',
-                emoji: '📢',
-                description: 'Reportar algo.',
-                value: 'reporte'
-            },
-            {
-                label: 'Donaciones',
-                emoji: '⭐',
-                description: 'Apoyar a la comunidad',
-                value: 'donacion'
-            }
-        ]
-    )
-)
+    if(message.author.bot) return;
+    if(!message.content.startsWith('!')) return;
+
+    try {
+        const command = message.content.toLowerCase().slice(1).split(' ')[0];
+        const executeCommand = require(`./commands/${command}.js`);
+        executeCommand( message);
+    } catch(error) {
+        console.log(`${message.content} no es un comando valido.`);
+    }
+});
 
 client.on("ready", () => {
     console.log(`${client.user.tag} esta listo.`);
-
-    const ticketPanelChannelId = process.env.CHANNEL_ID;
-    client.channels.fetch(ticketPanelChannelId)
-    .then(channel => channel.send({
-        embeds: [embed],
-        components: [menu]
-    }))
 });
 
 client.on('interactionCreate', async (interaction) => {
